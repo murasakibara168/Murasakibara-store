@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131c">
+  <title>MURASAKIBARA STORE</title>
+  <style>
+    :root{color-scheme:dark;--bg:#10131c;--panel:#191e2a;--panel2:#202738;--line:#30394d;--text:#f4f5fb;--muted:#a5aec2;--accent:#a78bfa;--accent2:#7c3aed;--good:#55d6a2;--bad:#ff7b8b}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 80% -10%,#30204f 0%,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+    header{padding:24px 16px 18px;border-bottom:1px solid var(--line);background:#10131cdd;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+    .wrap{max-width:1100px;margin:auto;padding:0 16px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+    .brand{font-weight:900;letter-spacing:2px;font-size:20px}.brand span{color:var(--accent)}.sub{color:var(--muted);font-size:13px}
+    button,input,textarea{font:inherit}button{border:0;border-radius:11px;padding:10px 14px;background:var(--accent2);color:white;font-weight:700;cursor:pointer}button.secondary{background:var(--panel2);border:1px solid var(--line)}button.danger{background:#7f2938}button:disabled{opacity:.45;cursor:not-allowed}
+    main{padding:26px 0 60px}.hero{padding:24px;border:1px solid #47366b;border-radius:20px;background:linear-gradient(120deg,#261b3e,#191e2a 65%);margin-bottom:22px}
+    h1{font-size:clamp(25px,5vw,38px);line-height:1.1;margin:0 0 8px}.hero p{margin:0;color:#c5bfd6}
+    .bar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.bar input{flex:1;min-width:180px}
+    input,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#111722;color:var(--text);outline:none}input:focus,textarea:focus{border-color:var(--accent)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:16px}
+    .card h3{margin:0 0 7px}.muted{color:var(--muted)}.price{font-size:21px;font-weight:850;margin:12px 0}.stock{font-size:12px;color:var(--muted)}
+    .sectionhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 12px}.sectionhead h2{margin:0;font-size:21px}
+    .hidden{display:none!important}.panel{margin-top:18px}.panel h2{margin-top:0}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.formgrid .wide{grid-column:1/-1}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:560px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}th{color:var(--muted);font-size:12px}
+    .notice{padding:12px 14px;border:1px solid #5a4b2a;background:#2c2517;color:#f1d99b;border-radius:12px;margin:14px 0;font-size:13px}
+    .status{margin-top:12px;color:var(--muted);font-size:13px;white-space:pre-wrap}.status.ok{color:var(--good)}.status.err{color:var(--bad)}
+    footer{border-top:1px solid var(--line);padding:20px 0;color:var(--muted);font-size:13px}
+    @media(max-width:600px){.formgrid{grid-template-columns:1fr}.hero{padding:18px}.top{align-items:flex-start}}
+  </style>
+</head>
+<body>
+<header><div class="wrap top">
+  <div><div class="brand">MURASAKIBARA<span>.</span>STORE</div><div class="sub">Цифровой магазин</div></div>
+  <div class="row" style="flex:0 0 auto"><button class="secondary" id="adminOpen">Админ-панель</button></div>
+</div></header>
+<main class="wrap">
+  <section class="hero">
+    <h1>Добро пожаловать в магазин</h1>
+    <p>Каталог цифровых товаров. Ассортимент и наличие обновляются администратором.</p>
+  </section>
+  <div class="bar">
+    <input id="search" placeholder="Поиск товара..." aria-label="Поиск товара">
+    <button class="secondary" id="refresh">Обновить каталог</button>
+  </div>
+  <div class="sectionhead"><h2>Каталог</h2><span class="muted" id="count">0 товаров</span></div>
+  <section class="grid" id="catalog"></section>
+  <div class="status" id="catalogStatus"></div>
+
+  <section class="panel hidden" id="adminPanel">
+    <div class="top">
+      <div><h2>Админ-панель</h2><div class="muted">Управление товарами и остатками</div></div>
+      <button class="secondary" id="logout">Выйти</button>
+    </div>
+    <div id="loginBox">
+      <p class="muted">Войди в отдельный аккаунт администратора.</p>
+      <div class="formgrid">
+        <div><label for="email">Email администратора</label><input id="email" type="email" autocomplete="username" placeholder="admin@example.com"></div>
+        <div><label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" placeholder="Пароль"></div>
+      </div>
+      <div class="row" style="margin-top:12px"><button id="login">Войти</button></div>
+    </div>
+    <div id="adminArea" class="hidden">
+      <div class="notice">Добавляй только законные товары и цифровые материалы, которыми имеешь право распоряжаться. Данные администратора и права доступа проверяются Supabase, а не этим HTML-файлом.</div>
+      <h3>Добавить / изменить товар</h3>
+      <form id="productForm" class="formgrid">
+        <input type="hidden" id="productId">
+        <div><label for="pName">Название</label><input id="pName" required maxlength="90" placeholder="Например, цифровой шаблон"></div>
+        <div><label for="pPrice">Цена (₽)</label><input id="pPrice" required type="number" min="0" step="1" placeholder="199"></div>
+        <div><label for="pStock">Количество</label><input id="pStock" required type="number" min="0" step="1" placeholder="5"></div>
+        <div><label for="pCategory">Категория</label><input id="pCategory" maxlength="50" placeholder="Цифровые товары"></div>
+        <div class="wide"><label for="pDescription">Описание</label><textarea id="pDescription" rows="2" maxlength="500" placeholder="Описание товара"></textarea></div>
+        <div class="wide row"><button type="submit" id="saveProduct">Сохранить товар</button><button type="button" class="secondary" id="cancelEdit">Очистить форму</button></div>
+      </form>
+      <h3 style="margin-top:26px">Товары в магазине</h3>
+      <div class="tablewrap"><table><thead><tr><th>Название</th><th>Цена</th><th>Остаток</th><th>Действия</th></tr></thead><tbody id="adminProducts"></tbody></table></div>
+      <div class="status" id="adminStatus"></div>
+    </div>
+  </section>
+  <div class="notice">Демонстрационный шаблон: реальные платежи и автоматическая выдача не включены до подключения защищённого серверного обработчика, проверки оплаты и настройки базы данных.</div>
+</main>
+<footer><div class="wrap">Связь: <a href="https://t.me/murasakibara_n1" style="color:var(--accent)">@murasakibara_n1</a></div></footer>
+
+<!-- Настройка: вставь URL и публичный anon key своего проекта Supabase.
+     Никогда не вставляй сюда service_role key, пароль администратора или секреты платёжной системы. -->
+<script>
+const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+const TABLE = "products";
+
+let sb = null, products = [], currentUser = null;
+const $ = id => document.getElementById(id);
+const safe = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+function status(id, message, type=""){const el=$(id);el.textContent=message;el.className="status "+type;}
+function configured(){return !SUPABASE_URL.includes("YOUR_PROJECT") && !SUPABASE_ANON_KEY.includes("YOUR_SUPABASE");}
+function rub(n){return new Intl.NumberFormat("ru-RU").format(Number(n)||0)+" ₽";}
+function renderCatalog(){
+ const q=$("search").value.trim().toLowerCase();
+ const visible=products.filter(p=>`${p.name||""} ${p.description||""} ${p.category||""}`.toLowerCase().includes(q));
+ $("count").textContent=`${visible.length} товаров`;
+ $("catalog").innerHTML=visible.length?visible.map(p=>`<article class="card">
+   <div class="muted">${safe(p.category||"Цифровой товар")}</div><h3>${safe(p.name)}</h3>
+   <div class="muted">${safe(p.description||"")}</div><div class="price">${rub(p.price)}</div>
+   <div class="stock">${Number(p.stock)>0?`В наличии: ${Number(p.stock)}`:"Нет в наличии"}</div>
+   <button class="secondary" style="width:100%;margin-top:12px" disabled>Покупка скоро будет доступна</button>
+ </article>`).join(""):`<div class="muted">Пока товаров нет.</div>`;
+}
+function renderAdmin(){
+ $("adminProducts").innerHTML=products.map(p=>`<tr>
+  <td>${safe(p.name)}</td><td>${rub(p.price)}</td><td>${Number(p.stock)||0}</td>
+  <td><button class="secondary" data-edit="${safe(p.id)}">Изменить</button> <button class="danger" data-delete="${safe(p.id)}">Удалить</button></td>
+ </tr>`).join("");
+}
+function clearForm(){$("productForm").reset();$("productId").value="";$("saveProduct").textContent="Сохранить товар";}
+function editProduct(p){$("productId").value=p.id;$("pName").value=p.name||"";$("pPrice").value=p.price;$("pStock").value=p.stock;$("pCategory").value=p.category||"";$("pDescription").value=p.description||"";$("saveProduct").textContent="Сохранить изменения";$("productForm").scrollIntoView({behavior:"smooth",block:"center"});}
+async function loadProducts(){
+ if(!sb){products=[];renderCatalog();status("catalogStatus","Сначала подключи Supabase в начале файла.");return;}
+ const {data,error}=await sb.from(TABLE).select("id,name,description,category,price,stock").order("name");
+ if(error){status("catalogStatus","Не удалось загрузить каталог: "+error.message,"err");return;}
+ products=data||[];renderCatalog();if(currentUser)renderAdmin();status("catalogStatus","Каталог обновлён.","ok");
+}
+async function updateAuthUI(){
+ const {data}=await sb.auth.getSession();currentUser=data.session?.user||null;
+ $("loginBox").classList.toggle("hidden",!!currentUser);$("adminArea").classList.toggle("hidden",!currentUser);$("logout").classList.toggle("hidden",!currentUser);
+}
+$("adminOpen").onclick=()=>{$("adminPanel").classList.toggle("hidden");$("adminPanel").scrollIntoView({behavior:"smooth",block:"start"});};
+$("search").addEventListener("input",renderCatalog);$("refresh").onclick=loadProducts;
+$("cancelEdit").onclick=clearForm;
+$("login").onclick=async()=>{
+ if(!sb){status("adminStatus","Сначала настрой Supabase.","err");return;}
+ const {error}=await sb.auth.signInWithPassword({email:$("email").value,password:$("password").value});
+ if(error){status("adminStatus","Ошибка входа: "+error.message,"err");return;}
+ await updateAuthUI();await loadProducts();status("adminStatus","Вход выполнен.","ok");
+};
+$("logout").onclick=async()=>{if(sb)await sb.auth.signOut();await updateAuthUI();status("adminStatus","Вы вышли.");};
+$("productForm").onsubmit=async e=>{
+ e.preventDefault();if(!sb||!currentUser)return;
+ const payload={name:$("pName").value.trim(),price:Number($("pPrice").value),stock:Number($("pStock").value),category:$("pCategory").value.trim(),description:$("pDescription").value.trim()};
+ if(!payload.name||payload.price<0||payload.stock<0)return status("adminStatus","Проверь название, цену и количество.","err");
+ const id=$("productId").value;
+ const result=id?await sb.from(TABLE).update(payload).eq("id",id):await sb.from(TABLE).insert(payload);
+ if(result.error){status("adminStatus","Не удалось сохранить: "+result.error.message,"err");return;}
+ clearForm();await loadProducts();status("adminStatus","Товар сохранён.","ok");
+};
+$("adminProducts").onclick=async e=>{
+ const edit=e.target.dataset.edit, del=e.target.dataset.delete;
+ if(edit){const p=products.find(x=>String(x.id)===edit);if(p)editProduct(p);}
+ if(del&&confirm("Удалить этот товар?")){
+  const {error}=await sb.from(TABLE).delete().eq("id",del);
+  if(error){status("adminStatus","Не удалось удалить: "+error.message,"err");return;}
+  await loadProducts();status("adminStatus","Товар удалён.","ok");
+ }
+};
+(async()=>{
+ if(!configured()){renderCatalog();status("catalogStatus","Подключи Supabase: укажи URL и anon key в начале файла. До этого каталог работает как пустой шаблон.");return;}
+ const script=document.createElement("script");script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";script.onload=async()=>{
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  sb.auth.onAuthStateChange(()=>updateAuthUI());await updateAuthUI();await loadProducts();
+ };script.onerror=()=>status("catalogStatus","Не удалось загрузить библиотеку Supabase.","err");document.head.appendChild(script);
+})();
+</script>
+</body>
+</html>
